@@ -1,20 +1,48 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// App.js
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { getAuth, onAuthStateChanged, signOut } from '@firebase/auth';
+import AuthScreen from './AuthScreen'; // Import the new AuthScreen
+import HomeScreen from './HomeScreen'; // Create and import this screen
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const auth = getAuth();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error.message);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Auth">
+        {user ? (
+          <Stack.Screen name="Home">
+            {props => <HomeScreen {...props} user={user} handleLogout={handleLogout} />}
+          </Stack.Screen>
+        ) : (
+          <Stack.Screen name="Auth">
+            {props => <AuthScreen {...props} setUser={setUser} />}
+          </Stack.Screen>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
