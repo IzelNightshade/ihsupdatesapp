@@ -1,16 +1,44 @@
-// HomeScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Button, FlatList, StyleSheet } from 'react-native';
-import UpdateCard from './UpdateCard'; // Make sure to create and import this component
+import UpdateCard from './UpdateCard';
+import { createClient } from 'contentful';
+
+const client = createClient({
+  space: 'h2jn9zusrpg1',
+  accessToken: '1xdR2iLbukyAvpJwb3sTi7ueem2KXsLgYNx14XUO5lYn',
+});
 
 const HomeScreen = ({ user, handleLogout }) => {
-  const [updates, setUpdates] = useState([
-    { id: '1', title: 'School Event', summary: 'Join us for a school-wide event...', level: 'school' },
-    { id: '2', title: 'Grade 10 Exam Schedule', summary: 'The exam schedule for Grade 10...', level: 'grade' },
-    { id: '3', title: 'Division A Meeting', summary: 'Division A will have a meeting...', level: 'division' },
-    { id: '4', title: 'Personal Reminder', summary: 'Don’t forget to submit your assignment...', level: 'person' },
-  ]);
+  const [updates, setUpdates] = useState([]);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    const fetchUpdates = async () => {
+      try {
+        const response = await client.getEntries({
+          content_type: 'Updates' // Replace with your actual content type ID for updates
+        });
+
+        const fetchedUpdates = await Promise.all(response.items.map(async (item) => {
+          const fullUpdate = await client.getEntry(item.sys.id);
+          console.log(fetchedUpdates)
+          return {
+            id: fullUpdate.sys.id,
+            title: fullUpdate.fields.title,
+            content: fullUpdate.fields.content,
+            level: fullUpdate.fields.level,
+            // Add any other fields you want to display
+          };
+        }));
+
+        setUpdates(fetchedUpdates);
+      } catch (error) {
+        console.error('Error fetching updates from Contentful:', error);
+      }
+    };
+
+    fetchUpdates();
+  }, []);
 
   const filteredUpdates = updates.filter(update => filter === 'all' || update.level === filter);
 
@@ -21,20 +49,20 @@ const HomeScreen = ({ user, handleLogout }) => {
         <Button title="School" onPress={() => setFilter('school')} />
         <Button title="Grade" onPress={() => setFilter('grade')} />
         <Button title="Division" onPress={() => setFilter('division')} />
-        <Button title="Personal" onPress={() => setFilter('person')} />
+        <Button title="Person" onPress={() => setFilter('person')} />
       </View>
       <FlatList
         data={filteredUpdates}
         renderItem={({ item }) => (
           <UpdateCard
             title={item.title}
-            summary={item.summary}
+            content={item.content}
             level={item.level}
+            // Pass any other props to UpdateCard as needed
           />
         )}
         keyExtractor={item => item.id}
       />
-      <Button title="Logout" onPress={handleLogout} color="#e74c3c" />
     </View>
   );
 };
