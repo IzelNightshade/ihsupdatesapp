@@ -12,7 +12,7 @@ const levelColors = {
 const UpdateCard = ({ title, summary, level }) => {
   return (
     <View style={styles.card}>
-      <View style={[styles.badge, { backgroundColor: levelColors[level] }]}>
+      <View style={[styles.badge, { backgroundColor: levelColors[level] || '#333' }]}>
         <Text style={styles.badgeText}>{level.toUpperCase()}</Text>
       </View>
       <Text style={styles.title}>{title}</Text>

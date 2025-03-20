@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { getAuth, onAuthStateChanged, signOut } from '@firebase/auth';
-import AuthScreen from './AuthScreen'; // Import the new AuthScreen
-import HomeScreen from './HomeScreen'; // Create and import this screen
+import AuthScreen from './AuthScreen';
+import HomeScreen from './HomeScreen';
 
 const Stack = createStackNavigator();
 

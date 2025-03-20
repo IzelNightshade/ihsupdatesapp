@@ -1,3 +1,4 @@
+// HomeScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Button, FlatList, StyleSheet } from 'react-native';
 import UpdateCard from './UpdateCard';
@@ -16,21 +17,17 @@ const HomeScreen = ({ user, handleLogout }) => {
     const fetchUpdates = async () => {
       try {
         const response = await client.getEntries({
-          content_type: 'Updates' // Replace with your actual content type ID for updates
+          content_type: 'Updates',
         });
 
-        const fetchedUpdates = await Promise.all(response.items.map(async (item) => {
-          const fullUpdate = await client.getEntry(item.sys.id);
-          console.log(fetchedUpdates)
-          return {
-            id: fullUpdate.sys.id,
-            title: fullUpdate.fields.title,
-            content: fullUpdate.fields.content,
-            level: fullUpdate.fields.level,
-            // Add any other fields you want to display
-          };
+        const fetchedUpdates = response.items.map(item => ({
+          id: item.sys.id,
+          title: item.fields.title,
+          summary: item.fields.content, // Changed `content` to `summary`
+          level: item.fields.level,
         }));
 
+        console.log("Fetched Updates:", fetchedUpdates);
         setUpdates(fetchedUpdates);
       } catch (error) {
         console.error('Error fetching updates from Contentful:', error);
@@ -45,21 +42,14 @@ const HomeScreen = ({ user, handleLogout }) => {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.filterContainer}>
-        <Button title="All" onPress={() => setFilter('all')} />
-        <Button title="School" onPress={() => setFilter('school')} />
-        <Button title="Grade" onPress={() => setFilter('grade')} />
-        <Button title="Division" onPress={() => setFilter('division')} />
-        <Button title="Person" onPress={() => setFilter('person')} />
+        {['all', 'school', 'grade', 'division', 'person'].map(level => (
+          <Button key={level} title={level.toUpperCase()} onPress={() => setFilter(level)} />
+        ))}
       </View>
       <FlatList
         data={filteredUpdates}
         renderItem={({ item }) => (
-          <UpdateCard
-            title={item.title}
-            content={item.content}
-            level={item.level}
-            // Pass any other props to UpdateCard as needed
-          />
+          <UpdateCard title={item.title} summary={item.summary} level={item.level} />
         )}
         keyExtractor={item => item.id}
       />

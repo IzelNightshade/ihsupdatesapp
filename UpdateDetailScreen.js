@@ -1,3 +1,4 @@
+// UpdateDetailScreen.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
@@ -7,7 +8,7 @@ const UpdateDetailScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{update.title}</Text>
-      <Text style={styles.content}>{update.content}</Text>
+      <Text style={styles.content}>{update.summary}</Text>
     </View>
   );
 };
